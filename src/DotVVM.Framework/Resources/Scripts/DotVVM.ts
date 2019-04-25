@@ -218,21 +218,28 @@ class DotVVM {
     public useHistoryApiSpaNavigation: boolean;
     public isPostbackRunning = ko.observable(false);
 
-    public init(viewModelName: string, culture: string): void {
+    public init(viewModelName: string, culture: string, viewModel?: any): void {
         this.addKnockoutBindingHandlers();
 
+        var input = <HTMLInputElement>document.getElementById("__dot_viewmodel_" + viewModelName);
+
         // load the viewmodel
-        var thisViewModel = this.viewModels[viewModelName] = JSON.parse((<HTMLInputElement>document.getElementById("__dot_viewmodel_" + viewModelName)).value);
-        if (thisViewModel.resources) {
-            for (var r in thisViewModel.resources) {
+        if (input && input.value.length) {
+            viewModel = JSON.parse(input.value);
+        }
+
+        this.viewModels[viewModelName] = viewModel;
+
+        if (viewModel.resources) {
+            for (var r in viewModel.resources) {
                 this.resourceSigns[r] = true;
             }
         }
-        if (thisViewModel.renderedResources) {
-            thisViewModel.renderedResources.forEach(r => this.resourceSigns[r] = true);
+        if (viewModel.renderedResources) {
+            viewModel.renderedResources.forEach(r => this.resourceSigns[r] = true);
         }
-        var idFragment = thisViewModel.resultIdFragment;
-        var viewModel = thisViewModel.viewModel = this.serialization.deserialize(this.viewModels[viewModelName].viewModel, {}, true);
+        var idFragment = viewModel.resultIdFragment;
+        var viewModel = viewModel.viewModel = this.serialization.deserialize(this.viewModels[viewModelName].viewModel, {}, true);
 
         // initialize services
         this.culture = culture;

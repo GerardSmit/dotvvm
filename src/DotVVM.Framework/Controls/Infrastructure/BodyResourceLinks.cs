@@ -29,18 +29,15 @@ namespace DotVVM.Framework.Controls
             }
 
             // render the serialized viewmodel
-            var serializedViewModel = ((DotvvmRequestContext) context).GetSerializedViewModel();
             writer.AddAttribute("type", "hidden");
             writer.AddAttribute("id", "__dot_viewmodel_root");
-            writer.AddAttribute("value", serializedViewModel);
             writer.RenderSelfClosingTag("input");
 
             // init on load
+            var serializedViewModel = ((DotvvmRequestContext) context).GetSerializedViewModel();
+            var serializedCultureName = JsonConvert.ToString(CultureInfo.CurrentCulture.Name, '"', StringEscapeHandling.EscapeHtml);
             writer.RenderBeginTag("script");
-            writer.WriteUnencodedText($@"
-window.dotvvm.domUtils.onDocumentReady(function () {{
-    window.dotvvm.init('root', {JsonConvert.ToString(CultureInfo.CurrentCulture.Name, '"', StringEscapeHandling.EscapeHtml)});
-}});");
+            writer.WriteUnencodedText($"window.dotvvm.domUtils.onDocumentReady(function(){{window.dotvvm.init('root', {serializedCultureName}, {serializedViewModel})}})");
             writer.RenderEndTag();
         }
     }

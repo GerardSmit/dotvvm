@@ -1,21 +1,15 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
 };
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -987,21 +981,25 @@ var DotVVM = /** @class */ (function () {
             this.postbackQueues[name] = { queue: [], noRunning: 0 };
         return this.postbackQueues[name];
     };
-    DotVVM.prototype.init = function (viewModelName, culture) {
+    DotVVM.prototype.init = function (viewModelName, culture, viewModel) {
         var _this = this;
         this.addKnockoutBindingHandlers();
+        var input = document.getElementById("__dot_viewmodel_" + viewModelName);
         // load the viewmodel
-        var thisViewModel = this.viewModels[viewModelName] = JSON.parse(document.getElementById("__dot_viewmodel_" + viewModelName).value);
-        if (thisViewModel.resources) {
-            for (var r in thisViewModel.resources) {
+        if (input && input.value.length) {
+            viewModel = JSON.parse(input.value);
+        }
+        this.viewModels[viewModelName] = viewModel;
+        if (viewModel.resources) {
+            for (var r in viewModel.resources) {
                 this.resourceSigns[r] = true;
             }
         }
-        if (thisViewModel.renderedResources) {
-            thisViewModel.renderedResources.forEach(function (r) { return _this.resourceSigns[r] = true; });
+        if (viewModel.renderedResources) {
+            viewModel.renderedResources.forEach(function (r) { return _this.resourceSigns[r] = true; });
         }
-        var idFragment = thisViewModel.resultIdFragment;
-        var viewModel = thisViewModel.viewModel = this.serialization.deserialize(this.viewModels[viewModelName].viewModel, {}, true);
+        var idFragment = viewModel.resultIdFragment;
+        var viewModel = viewModel.viewModel = this.serialization.deserialize(this.viewModels[viewModelName].viewModel, {}, true);
         // initialize services
         this.culture = culture;
         this.validation = new DotvvmValidation(this);
@@ -1186,8 +1184,8 @@ var DotVVM = /** @class */ (function () {
     DotVVM.prototype.sortHandlers = function (handlers) {
         var getHandler = (function () {
             var handlerMap = {};
-            for (var _i = 0, handlers_2 = handlers; _i < handlers_2.length; _i++) {
-                var h = handlers_2[_i];
+            for (var _i = 0, handlers_1 = handlers; _i < handlers_1.length; _i++) {
+                var h = handlers_1[_i];
                 if (h.name != null) {
                     handlerMap[h.name] = h;
                 }
@@ -1195,8 +1193,8 @@ var DotVVM = /** @class */ (function () {
             return function (s) { return typeof s == "string" ? handlerMap[s] : s; };
         })();
         var dependencies = handlers.map(function (handler, i) { return (handler["@sort_index"] = i, ({ handler: handler, deps: (handler.after || []).map(getHandler) })); });
-        for (var _i = 0, handlers_1 = handlers; _i < handlers_1.length; _i++) {
-            var h = handlers_1[_i];
+        for (var _i = 0, handlers_2 = handlers; _i < handlers_2.length; _i++) {
+            var h = handlers_2[_i];
             if (h.before)
                 for (var _a = 0, _b = h.before.map(getHandler); _a < _b.length; _a++) {
                     var before = _b[_a];
@@ -1870,7 +1868,6 @@ var DotVVM = /** @class */ (function () {
         ko.virtualElements.allowedBindings["dotvvm-SSR-foreach"] = true;
         ko.bindingHandlers["dotvvm-SSR-foreach"] = {
             init: function (element, valueAccessor, _allBindings, _viewModel, bindingContext) {
-                var _a;
                 if (!bindingContext)
                     throw new Error();
                 var value = valueAccessor();
@@ -1878,6 +1875,7 @@ var DotVVM = /** @class */ (function () {
                 element.innerBindingContext = innerBindingContext;
                 ko.applyBindingsToDescendants(innerBindingContext, element);
                 return { controlsDescendantBindings: true }; // do not apply binding again
+                var _a;
             }
         };
         ko.virtualElements.allowedBindings["dotvvm-SSR-item"] = true;
@@ -1896,7 +1894,6 @@ var DotVVM = /** @class */ (function () {
         ko.virtualElements.allowedBindings["withGridViewDataSet"] = true;
         ko.bindingHandlers["withGridViewDataSet"] = {
             init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-                var _a;
                 if (!bindingContext)
                     throw new Error();
                 var value = valueAccessor();
@@ -1904,6 +1901,7 @@ var DotVVM = /** @class */ (function () {
                 element.innerBindingContext = innerBindingContext;
                 ko.applyBindingsToDescendants(innerBindingContext, element);
                 return { controlsDescendantBindings: true }; // do not apply binding again
+                var _a;
             },
             update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
             }
